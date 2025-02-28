@@ -58,10 +58,6 @@ classDiagram
         + remove(Context&)
     }
     Modifier --> "*" Context : appliedModifiers
-    class TechModule {
-        <<abstract>>
-
-    }
 ```
 
 The Context class is an abstract class that represent a generic element in the game (as suggested by the ContextType enum). Contexts are organized hierarchycally, in a tree, whit Empires on top, then the Systems of an Empire, the stellar bodies in them (planets, stars, asteroids, space structures...), the districts on planets and jobs in districts. Contexts have a map of properties (name, value) that represents the a generic value of the context, and also their flat and percentage modifiers. The total value of a property is calculated as:
@@ -70,3 +66,21 @@ The Context class is an abstract class that represent a generic element in the g
 When a modifier is applied to a context, first the context's type is evaluated: if it's superior or inferior to the "level" of the modifier, the modifier is applied to all the children or to the parent (respectively) of the context, until it reaches the correct level. Then, the modifier will be added to the "appliedModifiers" array, and its value will be added to the "flat modifiers" of the property associated to the modifier (its propertyName string), if the flat attribute is true, else it will be added to the "percentage modifiers".
 
 When a modifier is removed, it will be removed by the appliedModifiers array and its effects will be removed from the maps.
+
+```mermaid
+    class TechModule {
+        <<abstract>>
+        - string name
+        + abstract upgrade() *TechModule 
+    }
+    enum TechLabels {
+        job_primary,
+        job_auxiliary,
+        minerals,
+        energy,
+        food
+    }
+    TechLabel --> "1" TechModule : labels
+```
+
+The TechModule abstract class will represent the various tech-modules in the game. The fundamental method "upgrade" returns a new, more powerful, version of the module. Used while innovating.
