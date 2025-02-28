@@ -1,8 +1,6 @@
-# Ideas for Stelaris II
+# Idea a for a sequel of a famous sci-fi game
 
-*typo in the name is for the coyright (just in case)*
-
-This is a fan-made list of ideas of an hypothetical Stellaris 2. It's been written with this concept in mind: a game that "feels" like Stellaris but has different, more realistic, gameplay.
+This is a fan-made open source game ispired by Stelaris (typo is for the copyright). It's been written with this concept in mind: a game that "feels" like Stellaris but has different, more realistic, gameplay.
 
 Notable features:
 - with pops, we consider their actual number and a mathematically correct distribution to model natality and mortality
@@ -40,8 +38,8 @@ At each month, the quantity of each group is increased by a value, representing 
 > **delta = natality - mortality + immigration**
 
 Explaination of the members of this formula:
-- **natality**: calculated as $$\frac{specie.base natality}{specie.lifespan * 12} * group.quantity * specie.adulthood percentage$$ it represents the average number of sons that individuals in a group have in a month.
-- **mortality**: calculated as $$\frac{quantity}{specie.lifespan * 12}$$ it represents the average number of individuals dying in a month.
+- **natality**: calculated as the specie natality divided by the specie lifespan (in months), multiplied by the quantity of the group and the adulthood percentage; it represents the average number of sons that individuals in a group have in a month.
+- **mortality**: calculated as the quantity divided by the specie lifespan (in months) it represents the average number of individuals dying in a month.
 - **immigration**: represent the quantity of individuals immigrating/emigrating to/from the planet, basing on a list of factors (if positive, immigration, if negative, emigration).
 
 *Note: to determine natality and mortality we might actually sample a number from a gaussian with the correct mean and variance, instead of taking the average*
@@ -60,11 +58,10 @@ Each specie is characterized by:
 
     these three values start fitting the homeworld, but genetic and/or cybernetic technologies can modify them, to adapt the specie to other planets.
 
-We make the assumption that the distribution of the probability for a single individual to die each month is bernoullian ($p = \frac{1}{12 * lifespan}$)
+We make the assumption that the distribution of the probability for a single individual to die each month is bernoullian (p = 1 divided by the lifespan in months)
 
-**Definition:** *adulthood percentage*, represents the percentage of individuals in a population that are adult (so able to reproduce and produce). It is calculated as:
-
-$$(1 - \frac{1}{12 * lifespan}) ^ {adulthood*12}$$
+**Definition:** *adulthood percentage*, represents the percentage of individuals in a population that are adult (so able to reproduce and produce). It is calculated as 
+1 divided by the lifespan in months, raised to the adulthood in months.
 
 ### 1.2 - Jobs
 
@@ -177,11 +174,9 @@ A planet can be colonized by a specie only if it has an habitability high enough
 On each planet, for each specie, the habitability is calculated as:
 $$\frac{g + a + t}{3}$$
 Where:
-- **g**: represents how well the specie is able to adapt to the planet gravity, and is defined as: 
-$$g = exp[-2(g_{planet} - g_{specie})^2] * 100$$
+- **g**: represents how well the specie is able to adapt to the planet gravity, and is defined as a gaussian function with average equal to the specie optimal gravity and variance equal to 1/4, with the gravity of the planet as x (multiplied by 100 to make it a percentage).
 - **a**: represents how well the specie is able breath the atmosphere of the planet, and is defined as 100 if the planet is specie's homeworld, 75 if it has an atmosphere of the same type (the idea is that probably the atmopshere is similar but not perfect), 25 if it has an atmosphere of another type, 0 if the planet has no atmosphere
-- **t**: represents how well the specie is able to adapt to the planet temperature, and is defined as:
-$$t = exp[-\frac{(t_{planet} - t_{specie})^2}{250}] * 100$$
+- **t**: represents how well the specie is able to adapt to the planet temperature, and is defined as a gaussian function with average equal to the specie optimal temperature and variance equal to 125, with the temperature of the planet as x (multiplied by 100 to make it a percentage).
 
 Note how these values always result as valid percentages (between 0 and 100), and that the more similar a planet is to the specie's homeworld, the closer this value will be to 100%. Some examples, considering a human-like specie, adapted to live in a planet that has 1-g gravity, oxygen-nitrogen atmosphere and a 290 K average temperature:
 
