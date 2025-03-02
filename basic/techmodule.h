@@ -15,6 +15,9 @@ enum TechLabel {
     tool
 };
 
+/**
+ * Represents a generic technology in posses of an empire
+ */
 class TechModule
 {
 protected:
@@ -27,5 +30,8 @@ public:
         labels.push_back(label);
     }
 
+    /**
+     * Returns an upgraded version of the TechModule, with the same name
+     */
     virtual TechModule* upgrade() const = 0;
 };

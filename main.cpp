@@ -28,5 +28,11 @@ int main() {
     desing->apply(slot);
 
     std::cout << "Production in minerals: " << slot->property(productionProperty(minerals)) << "; ";
-    std::cout << "Upkeep in energy: " << slot->property(upkeepProperty(energy));
+    std::cout << "Upkeep in energy: " << slot->property(upkeepProperty(energy)) << std::endl;
+
+    desing->setPrimary((PrimaryJobModule*)primary->upgrade());
+    desing->upgradeAllSlots();
+
+    std::cout << "Production in minerals: " << slot->property(productionProperty(minerals)) << "; ";
+    std::cout << "Upkeep in energy: " << slot->property(upkeepProperty(energy)) << std::endl;
 }

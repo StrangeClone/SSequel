@@ -29,6 +29,10 @@ JobDesign::JobDesign(PrimaryJobModule *primary, int aux, ...) : tag(primary->tag
     }
 }
 
+void JobDesign::setPrimary(const PrimaryJobModule* pr) {
+    primary = pr;
+}
+
 void JobDesign::addAuxiliary(const AuxiliaryJobModule* aux) {
     if (auxiliaries.size() < 3) {
         auxiliaries.push_back(aux);
