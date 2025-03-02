@@ -8,25 +8,21 @@ using std::string;
 using std::unordered_map;
 using std::vector;
 
-class Context
+enum ContextType
 {
+    empire = 0,
+    stellar_system,
+    celestial_body,
+    job
+};
 
-    friend Modifier;
+class Context;
 
-private:
-    ContextType type;
-    const string &tag;
-    Context *parent;
-    vector<Context *> children;
-    vector<const Modifier *> appliedModifiers;
-    unordered_map<const string &, float, std::hash<string>> propertiesBaseValue;
-    unordered_map<const string &, float, std::hash<string>> propertiesFlatModifiers;
-    unordered_map<const string &, float, std::hash<string>> propertiesPercentageModifiers;
-
+class ContextCondition
+{
 public:
-    Context(ContextType type, const string &tag);
-    virtual void update();
-    float property(const string &property) const;
+    virtual bool check(const Context &c) const = 0;
+    virtual ~ContextCondition() {}
 };
 
 class Modifier
@@ -34,20 +30,39 @@ class Modifier
 private:
     float value;
     bool flat;
-    const string &propertyName;
+    const string *propertyName;
     const ContextType level;
+    const ContextCondition *condition;
 
 public:
-    Modifier(const string &propertyName, float value, bool flat, const ContextType level);
+    Modifier(const string *propertyName, float value, bool flat, ContextType level, const ContextCondition *condition);
     void apply(Context &context) const;
     void remove(Context &context) const;
+    Modifier *upgrade() const;
 };
 
-enum ContextType
+class Context
 {
-    empire = 0,
-    system,
-    celestial_body,
-    district,
-    job
+
+    friend class Modifier;
+
+private:
+    ContextType type;
+    const string &tag;
+    Context *parent;
+    vector<Context *> children;
+
+protected:
+    vector<const Modifier *> appliedModifiers;
+    unordered_map<const string *, float, std::hash<const string *>> propertiesBaseValue;
+    unordered_map<const string *, float, std::hash<const string *>> propertiesFlatModifiers;
+    unordered_map<const string *, float, std::hash<const string *>> propertiesPercentageModifiers;
+
+public:
+    Context(ContextType type, const string &tag);
+    virtual void update();
+
+    const string& getTag() const;
+    float property(const string *property);
+    void setPropertyBaseValue(const string *property, float value);
 };

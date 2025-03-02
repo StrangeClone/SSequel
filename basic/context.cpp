@@ -1,4 +1,5 @@
-#include <context.h>
+#include "context.h"
+#include "random.h"
 
 #include <algorithm>
 
@@ -15,21 +16,33 @@ void Context::update()
     }
 }
 
-float Context::property(const string &property) const
-{
-    return (propertiesBaseValue.at(property) + propertiesFlatModifiers.at(property)) * propertiesPercentageModifiers.at(property);
+const string& Context::getTag() const {
+    return tag;
 }
 
-Modifier::Modifier(const string &propertyName, float value, bool flat, const ContextType level) : propertyName(propertyName),
-                                                                                                  value(value),
-                                                                                                  flat(flat),
-                                                                                                  level(level)
+float Context::property(const string *property)
+{
+    return (propertiesBaseValue[property] + propertiesFlatModifiers[property]) * (1 + propertiesPercentageModifiers[property]);
+}
+
+void Context::setPropertyBaseValue(const string *property, float value)
+{
+    propertiesBaseValue[property] = value;
+}
+
+Modifier::Modifier(const string *propertyName, float value, bool flat, ContextType level, const ContextCondition *condition) : propertyName(propertyName),
+                                                                                                                               value(value),
+                                                                                                                               flat(flat),
+                                                                                                                               level(level),
+                                                                                                                               condition(condition)
 {
 }
 
 void Modifier::apply(Context &c) const
 {
-    if (c.type == level && std::find(c.appliedModifiers.begin(), c.appliedModifiers.end(), this) == c.appliedModifiers.end())
+    if (c.type == level &&
+        (condition == NULL || condition->check(c)) &&
+        std::find(c.appliedModifiers.begin(), c.appliedModifiers.end(), this) == c.appliedModifiers.end())
     {
         if (flat)
         {
@@ -79,5 +92,17 @@ void Modifier::remove(Context &c) const
     else if (c.parent != NULL)
     {
         remove(*c.parent);
+    }
+}
+
+Modifier *Modifier::upgrade() const
+{
+    if (flat)
+    {
+        return new Modifier(propertyName, value + uniform(2), flat, level, condition);
+    }
+    else
+    {
+        return new Modifier(propertyName, value + uniform(0.2), flat, level, condition);
     }
 }

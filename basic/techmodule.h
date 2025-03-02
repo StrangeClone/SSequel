@@ -6,25 +6,26 @@
 using std::string;
 using std::vector;
 
+enum TechLabel {
+    job_primary,
+    job_auxiliar,
+    energetic,
+    mining,
+    agricoltural,
+    tool
+};
+
 class TechModule
 {
-private:
-    string name;
+protected:
+    const string name;
     vector<TechLabel> labels;
 
 public:
-    TechModule(string name) : name(name) {}
+    TechModule(const string& name) : name(name) {}
     void addLabel(TechLabel label) {
         labels.push_back(label);
     }
 
     virtual TechModule* upgrade() const = 0;
-};
-
-enum TechLabel {
-    job_primary,
-    job_auxiliar,
-    energy,
-    minerals,
-    food
 };
