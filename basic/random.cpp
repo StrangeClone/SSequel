@@ -15,3 +15,7 @@ float uniform(float bottom, float top) {
         return bottom + uniform() * (top - bottom);
     }
 }
+
+int integerUniform(int bottom, int top) {
+    return bottom + rand() % (top - bottom);
+}

@@ -16,7 +16,7 @@ class PrimaryJobModule : public TechModule
     friend class JobDesign;
 
 private:
-    const string& tag;
+    const string* tag;
     unordered_map<Resources, float> production;
     unordered_map<Resources, float> upkeep;
 
@@ -42,7 +42,7 @@ class AuxiliaryJobModule : public TechModule
     friend class JobDesign;
 
 private:
-    vector<const Modifier*> modifiers;
+    set<const Modifier*> modifiers;
 
 public:
     AuxiliaryJobModule(const string &name);

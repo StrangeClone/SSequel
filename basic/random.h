@@ -14,3 +14,7 @@ float uniform(float top);
  * Returns a random float between bottom and top, or bottom if top is smaller than bottom
  */
 float uniform(float bottom, float top);
+/**
+ * Returns a random int between bottom and top
+ */
+int integerUniform(int bottom, int top);

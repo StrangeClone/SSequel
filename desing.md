@@ -11,7 +11,7 @@ classDiagram
         + empire
         + system
         + stellar body
-        + job
+        + pop group
     }
 
     class Resources {
@@ -100,12 +100,12 @@ classDiagram
 
 The TechModule abstract class will represent the various tech-modules in the game. The fundamental method "upgrade" returns a new, more powerful, version of the module. Used while innovating.
 
-## Package 2 - Jobs
+## Package 2 - Jobs and Pops
 
 ```mermaid
 classDiagram
-    class JobSlot {
-        - type = job
+    class PopGroup {
+        - type = pop group
         - int number
         + update()
         + reset()
@@ -132,10 +132,67 @@ classDiagram
     JobSlot --> "*" JobDesign : associatedSlots
 ```
 
-The class JobSlot represents all the jobs taken by a single Pop-group, on a single celestial body, for a single job-design. The properties it can have are:
+The class PopGroup represents all pops, on a single celestial body, for a single job-design. The properties it can have are:
 - "prd_{res}": the quantity of resource "res", as string (parse of the value)
 - "upk_{res}": the upkeep of resource "res", as string (parse of the value)
 
 The update method adds the production to (and removes upkeep from) the planet storage. The "reset" method clears all the properties. It will be used when the slot is applied a job-design.
 
-The JobDesign contains a reference to a JobPrimaryModule (defines primary characteristics) and to some JobAuxiliaryModules (defining some side effects). It can be "applied" to a jobSlot, setting production and upkeeps. The "updateAllSlots" method re-applies the design to all slots that previously had it.
+The JobDesign contains a reference to a JobPrimaryModule (defines primary characteristics) and to some JobAuxiliaryModules (defining some side effects). It can be "applied" to a PopGroup, setting production and upkeeps. The "updateAllSlots" method re-applies the design to all groups that previously had it.
+
+## Package 3 - Planet Management
+
+```mermaid
+classDiagram
+    class Planet {
+        - map~Resource, int~ resources
+        - map~JobDesign, int~ maxJobs
+        + addResource(Resource, float)
+        + removeReource(Resource, float)
+        + addDistrict(DistrictDesign)
+        + addPops(JobDesign, n)
+        + update()
+    }
+    Planet --|> Context
+    class District {
+        + District(DistrictDesign)
+    }
+    District --> "*" Planet : districts
+    class DistrictDesign {
+        - string tag
+        + getJobs(JobDesign) int
+        + getHousing() int
+    }
+    DistrictDesign --> "1" District
+    class PrimaryDistrictModule {
+        - int upkeep
+        - map~JobDesign, int~ availableJobs
+        + addJob(JobDesign, n, upkeep)
+        + upgrade() *TechModule
+    }
+    PrimaryDistrictModule --|> TechModule
+    PrimaryDistrictModule --> "1" DistrictDesign
+    class HousingDistrictModule {
+        - int housing
+        - int upkeep
+        + upgrade() *TechModule
+    }
+    HousingDistrictModule --|> TechModule
+    HousingDistrictModule --> "1" DistrictDesign
+    class AuxiliaryDistrictModule {
+        - vector~Modifier~ modifiers
+        - map~JobDesign, int~ extraJobs
+        + update() *TechModule
+    }
+    AuxiliaryDistrictModule --|> TechModule
+    AuxiliaryDistrictModule --> "0-5" DistrictDesign
+```
+
+The planet class contains all the data that represents a single planet. It has some properties:
+- "maxd", max districts: represents the max number of districts a planet can hold
+- "st_{res}", storage: the max number of storage for a specific resource. The values of "resources" map can't go over such values.
+- "hsng", housing: the current total housing of the planet
+
+The addDistrict method instantiate a new district, with the given DistrictDesign. It updates the number of jobs on the planet, updates the housing property and applies the modifiers, according to the contents of the DistrictDesign.
+
+The addPops method adds the number of pops specified, adding them to an existing group or creating a new group if there's none with such jobDesign. If pops for an unavailable job are added, they will be added as unemployed (no JobDesign).

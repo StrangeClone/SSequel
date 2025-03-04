@@ -1,7 +1,7 @@
 #include "job_techmodule.h"
 #include "../basic/random.h"
 
-PrimaryJobModule::PrimaryJobModule(const string& name, const string& tag) : TechModule(name), tag(tag)
+PrimaryJobModule::PrimaryJobModule(const string& name, const string& tag) : TechModule(name), tag(&tag)
 {}
 
 void PrimaryJobModule::addProduction(Resources res, float amount) {
@@ -13,10 +13,8 @@ void PrimaryJobModule::addUpkeep(Resources res, float amount) {
 }
 
 TechModule* PrimaryJobModule::upgrade() const {
-    PrimaryJobModule* updated = new PrimaryJobModule(name, tag);
-    for (TechLabel label : labels) {
-        updated->addLabel(label);
-    }
+    PrimaryJobModule* updated = new PrimaryJobModule(name, *tag);
+    updated->copyLabels(this);
     for (const auto& entry : production) {
         updated->addProduction(entry.first, entry.second + uniform(1, 4));
     }
@@ -36,14 +34,12 @@ AuxiliaryJobModule::~AuxiliaryJobModule() {
 }
 
 void AuxiliaryJobModule::addModifier(const Modifier* mod) {
-    modifiers.push_back(mod);
+    modifiers.insert(mod);
 }
 
 TechModule* AuxiliaryJobModule::upgrade() const {
     AuxiliaryJobModule* updated = new AuxiliaryJobModule(name);
-    for (TechLabel label : labels) {
-        updated->addLabel(label);
-    }
+    updated->copyLabels(this);
     for (const Modifier* modifier : modifiers) {
         updated->addModifier(modifier->upgrade());
     }

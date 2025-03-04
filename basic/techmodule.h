@@ -1,12 +1,13 @@
 #pragma once
 
 #include <string>
-#include <vector>
+#include <set>
 
 using std::string;
-using std::vector;
+using std::set;
 
-enum TechLabel {
+enum TechLabel
+{
     job_primary,
     job_auxiliar,
     energetic,
@@ -20,18 +21,27 @@ enum TechLabel {
  */
 class TechModule
 {
+    set<TechLabel> labels;
+
 protected:
     const string name;
-    vector<TechLabel> labels;
+    void copyLabels(const TechModule *other)
+    {
+        for (TechLabel label : other->labels)
+        {
+            addLabel(label);
+        }
+    }
 
 public:
-    TechModule(const string& name) : name(name) {}
-    void addLabel(TechLabel label) {
-        labels.push_back(label);
+    TechModule(const string &name) : name(name) {}
+    void addLabel(TechLabel label)
+    {
+        labels.insert(label);
     }
 
     /**
      * Returns an upgraded version of the TechModule, with the same name
      */
-    virtual TechModule* upgrade() const = 0;
+    virtual TechModule *upgrade() const = 0;
 };

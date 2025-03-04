@@ -209,7 +209,7 @@ Districts main purpose is to provide jobs and housing, spending a monthly upkeep
 Each district is associated to a district-design, composed of various tech-modules:
 - **primary technology**: defines the amount and kind(s) of jobs that the district provides. For each type of job available, the district-design is associated to a job-design
 - **housing technology**: tech-module that defines the base housing
-- **support technologies**: up to five technology that provides various bonuses (extra jobs, housing, reduced upkeep, some other bonuses).
+- **support technologies**: up to five technology that provides various bonuses (extra jobs, housing, reduced upkeep, bonuses to planet/empire).
 
 Primary technology tech-modules can be given only in a single type of districts, housing and support tech-modules may be given to different ones.
 
@@ -218,7 +218,6 @@ Example of district-design for a mining district:
 - housing tech: meta-concrete complexes: provides 400M housing
 - support technologies:
     - geo-search algorithms: district upkeep reduced by 15%
-    - heavy transport: worker job production +10%
     - laboratories for geological research: provides 25M researcher jobs, increases the probability of breakthrough for geological researchs.
 
 

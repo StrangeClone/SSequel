@@ -1,22 +1,45 @@
-#include "jobslot.h"
+#include "popgroup.h"
+#include "../planet/planet.h"
 
 #include <stdarg.h>
 #include <algorithm>
 
-JobSlot::JobSlot(const string& tag) : Context(ContextType::job, tag) {}
-
-void JobSlot::update() {
-    //TODO: add/remove resources from the planet's storage
+PopGroup::PopGroup(const string& tag, JobDesign* design, long amount) : Context(ContextType::pop_group, tag), design(design), n(amount) {
+    design->apply(this);
 }
 
-void JobSlot::resetProperties() {
+void PopGroup::update() {
+    Planet* planet = dynamic_cast<Planet*>(getParent());
+    if (planet != NULL) {
+        for (const auto& property : propertiesBaseValue) {
+            const string* name = property.first;
+            int res = std::stoi(property.first->substr(3));
+            if (name->find("prd") == 0) {
+                planet->addResources((Resources)res, property.second * n);
+            }
+            if (name->find("upk") == 0) {
+                planet->removeReources((Resources)res, property.second * n);
+            }
+        }
+    }
+}
+
+void PopGroup::resetProperties() {
     propertiesBaseValue.clear();
     propertiesFlatModifiers.clear();
     propertiesPercentageModifiers.clear();
     appliedModifiers.clear();
 }
 
-JobDesign::JobDesign(PrimaryJobModule *primary, int aux, ...) : tag(primary->tag), primary(primary)
+const JobDesign* PopGroup::getJob() const {
+    return design;
+}
+
+void PopGroup::increaseAmount(long amount) {
+    n += amount;
+}
+
+JobDesign::JobDesign(const PrimaryJobModule *primary, int aux, ...) : tag(primary->tag), primary(primary)
 {
     if (aux > 3)
     {
@@ -35,7 +58,7 @@ void JobDesign::setPrimary(const PrimaryJobModule* pr) {
 
 void JobDesign::addAuxiliary(const AuxiliaryJobModule* aux) {
     if (auxiliaries.size() < 3) {
-        auxiliaries.push_back(aux);
+        auxiliaries.insert(aux);
     }
 }
 
@@ -43,7 +66,11 @@ void JobDesign::removeAuxiliary(const AuxiliaryJobModule* aux) {
     auxiliaries.erase(std::find(auxiliaries.begin(), auxiliaries.end(), aux));
 }
 
-void JobDesign::apply(JobSlot* slot) {
+const string& JobDesign::getTag() const {
+    return *tag;
+}
+
+void JobDesign::apply(PopGroup* slot) {
     slot->resetProperties();
     for (const auto& entry : primary->production) {
         slot->setPropertyBaseValue(productionProperty(entry.first), entry.second);
@@ -60,7 +87,7 @@ void JobDesign::apply(JobSlot* slot) {
 }
 
 void JobDesign::upgradeAllSlots() {
-    for(JobSlot* slot : associatedSlots) {
+    for(PopGroup* slot : associatedSlots) {
         apply(slot);
     }
 }

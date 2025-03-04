@@ -1,38 +1,46 @@
 #include "basic/context.h"
-#include "jobs/jobslot.h"
+#include "jobs/popgroup.h"
 #include "basic/context_conditions.h"
+#include "planet/planet.h"
 
 #include <iostream>
 
 int main() {
-    PrimaryJobModule* primary = new PrimaryJobModule("mining laser-drills", "miner");
-    primary->addProduction(minerals, 5);
-    primary->addUpkeep(energy, 0.5f);
+    string jobTag("miner");
+    string districtTag("mining");
+
+    PrimaryJobModule* minerPrimary = new PrimaryJobModule("mining laser-drills", jobTag);
+    minerPrimary->addProduction(minerals, 5);
+    minerPrimary->addUpkeep(energy, 0.5f);
     
-    AuxiliaryJobModule* aux1 = new AuxiliaryJobModule("short-range geo-scans");
-    Modifier* aux1modifier = new Modifier(productionProperty(minerals), 0.15, false, job, checkTag("miner"));
-    aux1->addModifier(aux1modifier);
+    AuxiliaryJobModule* minerAuxiliary1 = new AuxiliaryJobModule("short-range geo-scans");
+    minerAuxiliary1->addModifier(new Modifier(productionProperty(minerals), 0.15, false, pop_group, checkTag(jobTag)));
     
-    AuxiliaryJobModule* aux2 = new AuxiliaryJobModule("support mining drones");
-    Modifier* aux2modifier = new Modifier(productionProperty(minerals), 0.20, false, job, checkTag("miner"));
-    aux2->addModifier(aux2modifier);
-    Modifier* aux2modifier2 = new Modifier(upkeepProperty(energy), 0.15, false, job, checkTag("miner"));
-    aux2->addModifier(aux2modifier2);
+    AuxiliaryJobModule* minerAuxiliary2 = new AuxiliaryJobModule("support mining drones");
+    minerAuxiliary2->addModifier(new Modifier(productionProperty(minerals), 0.20, false, pop_group, checkTag(jobTag)));
+    minerAuxiliary2->addModifier(new Modifier(upkeepProperty(energy), 0.15, false, pop_group, checkTag(jobTag)));
 
-    JobDesign* desing = new JobDesign(primary, 1, aux1);
-    desing->addAuxiliary(aux2);
-    desing->removeAuxiliary(aux1);
-    desing->addAuxiliary(aux1);
+    JobDesign* minerDesing = new JobDesign(minerPrimary, 2, minerAuxiliary1, minerAuxiliary2);
 
-    JobSlot* slot = new JobSlot("miner");
-    desing->apply(slot);
+    PrimaryJobModule* researcherPrimary = new PrimaryJobModule("quantum theory", "researcher");
+    researcherPrimary->addProduction(research, 3);
+    JobDesign* researcherDesign = new JobDesign(researcherPrimary);
+    
+    DistrictPrimaryModule* miningPrimary = new DistrictPrimaryModule("strategic strip mining", districtTag, 1e+7);
+    miningPrimary->addJob(minerDesing, 500e+6);
 
-    std::cout << "Production in minerals: " << slot->property(productionProperty(minerals)) << "; ";
-    std::cout << "Upkeep in energy: " << slot->property(upkeepProperty(energy)) << std::endl;
+    DistrictHousingModule* housing = new DistrictHousingModule("meta-concrete complexes", 400e+6, 1e+7);
 
-    desing->setPrimary((PrimaryJobModule*)primary->upgrade());
-    desing->upgradeAllSlots();
+    DistrictAuxiliaryModule* miningAuxiliary1 = new DistrictAuxiliaryModule("laboratories for geological research");
+    miningAuxiliary1->addJob(researcherDesign, 25e+6);
 
-    std::cout << "Production in minerals: " << slot->property(productionProperty(minerals)) << "; ";
-    std::cout << "Upkeep in energy: " << slot->property(upkeepProperty(energy)) << std::endl;
+    DistrictDesign* miningDesing = new DistrictDesign(miningPrimary, housing, 1, miningAuxiliary1);
+
+    Planet* planet = new Planet("Ukoob");
+    planet->addDistrict(miningDesing);
+    planet->addDistrict(miningDesing);
+    planet->addResources(energy, 1e10);
+    planet->addPops(minerDesing, 1e9);
+    planet->addPops(researcherDesign, 1e7);
+    planet->update();
 }

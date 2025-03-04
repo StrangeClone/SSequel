@@ -4,8 +4,27 @@
 #include <algorithm>
 
 Context::Context(ContextType type, const string &tag) : type(type),
-                                                        tag(tag)
+                                                        tag(&tag)
 {
+}
+
+void Context::setParent(Context* parent) {
+    this->parent = parent;
+}
+
+void Context::addChild(Context* context) {
+    if (context != this) {
+        children.push_back(context);
+        context->setParent(this);
+    }
+}
+
+Context* Context::getParent() const {
+    return parent;
+}
+
+const vector<Context*>& Context::getChildren() const {
+    return children;
 }
 
 void Context::update()
@@ -17,7 +36,7 @@ void Context::update()
 }
 
 const string& Context::getTag() const {
-    return tag;
+    return *tag;
 }
 
 float Context::property(const string *property)

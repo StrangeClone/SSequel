@@ -16,7 +16,7 @@ enum ContextType
     empire = 0,
     stellar_system,
     celestial_body,
-    job
+    pop_group
 };
 
 class Context;
@@ -81,15 +81,20 @@ class Context
 
 private:
     ContextType type;
-    const string &tag;
+    const string *tag;
     Context *parent;
-    vector<Context *> children;
+    vector<Context*> children;
 
 protected:
     vector<const Modifier *> appliedModifiers;
     unordered_map<const string *, float, std::hash<const string *>> propertiesBaseValue;
     unordered_map<const string *, float, std::hash<const string *>> propertiesFlatModifiers;
     unordered_map<const string *, float, std::hash<const string *>> propertiesPercentageModifiers;
+
+    void addChild(Context* child);
+    void setParent(Context* parent);
+    Context* getParent() const; 
+    const vector<Context*>& getChildren() const;
 
 public:
     Context(ContextType type, const string &tag);
